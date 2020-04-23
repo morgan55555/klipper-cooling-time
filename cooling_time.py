@@ -55,7 +55,7 @@ class Cooling_Estimator:
             "with these parameters and restart the printer." % cooling_coef)
         # Store results for SAVE_CONFIG
         configfile = self.printer.lookup_object('configfile')
-        configfile.set(cooling_time, heater_name, "%.3f" % cooling_coef)
+        configfile.set('cooling_time', heater_name, "%.3f" % cooling_coef)
     def get_status(self, eventtime):
         return {'calc': self._calc}
     def _calc(self, heater_name, target_temp):
