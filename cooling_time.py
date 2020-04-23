@@ -19,7 +19,7 @@ import heater
 class Cooling_Estimator:
     def __init__(self, config):
         self.printer = config.get_printer()
-        self.reactor = printer.get_reactor()
+        self.reactor = self.printer.get_reactor()
         self.room_temp = config.getfloat('room_temp')
         self.config = config
         self.gcode = self.printer.lookup_object('gcode')
