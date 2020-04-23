@@ -29,5 +29,5 @@ gcode:
 [gcode_macro TEST]
 gcode:
     # Return time estimation for extruder cooling to 45 deg
-    {printer.gcode.action_respond_info(printer.cooling_time.calc("extruder",45))}
+    {printer.gcode.action_respond_info(printer.cooling_time.calc("extruder",45)|float)}
 ```
