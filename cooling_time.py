@@ -39,7 +39,7 @@ class Cooling_Estimator:
             return
         heater = self._get_heater(heater_name)
         self.printer.lookup_object('toolhead').get_last_move_time()
-        calibrate = ControlCoolingEstimator(heater, max_temp)
+        calibrate = ControlCoolingEstimator(heater, max_temp, min_temp, self.room_temp)
         old_control = heater.set_control(calibrate)
         try:
             heater.set_temp(max_temp)
