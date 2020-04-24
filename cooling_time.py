@@ -39,23 +39,26 @@ class Cooling_Estimator:
             return
         heater = self._get_heater(heater_name)
         self.printer.lookup_object('toolhead').get_last_move_time()
+        heater.set_temp(max_temp)
+        self.gcode.wait_for_temperature(heater)
         calibrate = ControlCoolingEstimator(heater, max_temp, min_temp, self.room_temp)
         old_control = heater.set_control(calibrate)
         try:
-            heater.set_temp(max_temp)
+            heater.set_temp(min_temp)
         except self.printer.command_error as e:
             heater.set_control(old_control)
             raise
         self.gcode.wait_for_temperature(heater)
         heater.set_control(old_control)
+        heater.set_temp(0)
         cooling_coef = calibrate.calc_final_coef()
         self.gcode.respond_info(
-            "New cooling coef is %.3f\n"
+            "New cooling coef is %.6f\n"
             "The SAVE_CONFIG command will update the printer config file\n"
             "with these parameters and restart the printer." % cooling_coef)
         # Store results for SAVE_CONFIG
         configfile = self.printer.lookup_object('configfile')
-        configfile.set('cooling_time', heater_name, "%.3f" % cooling_coef)
+        configfile.set("cooling_time", heater_name, "%.6f" % cooling_coef)
     def get_status(self, eventtime):
         return {'calc': self._calc}
     def _calc(self, heater_name, target_temp):
@@ -95,7 +98,7 @@ class ControlCoolingEstimator:
         self.min_temp = min_temp
         self.room_temp = room_temp
         # Heating control
-        self.cooling = False
+        self.init = False
         self.done = False
         # Sample recording
         self.temp_samples = []
@@ -104,17 +107,12 @@ class ControlCoolingEstimator:
         self.heater.set_pwm(read_time, value)
     def temperature_update(self, read_time, temp, target_temp):
         if not self.done:
-            if self.cooling:
-                self.temp_samples.append((read_time, temp))
-                if temp <= target_temp:
-                    self.done = True
-            elif temp < target_temp:
-                self.set_pwm(read_time, self.heater_max_power)
-            else:
-                self.cooling = True
-                self.heater.alter_target(self.min_temp)
-        if self.cooling:
+            self.temp_samples.append((read_time, temp))
+            if temp <= target_temp:
+                self.done = True
+        elif not self.init:
             self.set_pwm(read_time, 0.)
+            self.init = True
     def check_busy(self, eventtime, smoothed_temp, target_temp):
         if not self.done:
             return True
