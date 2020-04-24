@@ -82,11 +82,12 @@ class Cooling_Estimator:
         return heater
     def _get_heater_temp(self, heater):
         if heater == None:
-            return None
+            return 0
         eventtime = self.reactor.monotonic()
         if heater.check_busy(eventtime):
-            return None
-        return heater.get_temp(eventtime)[0]
+            return 0
+        current_temp, _ = heater.get_temp(eventtime)
+        return current_temp
 
 
 
