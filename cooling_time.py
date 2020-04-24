@@ -71,7 +71,7 @@ class Cooling_Estimator:
             return 0
         delta = temp - self.room_temp
         diff = target_temp - self.room_temp
-        return -log( diff / delta ) / coef
+        return int(round(-log( diff / delta ) / coef))
     def _get_heater(self, heater_name):
         heater = None
         pheater = self.printer.lookup_object('heater')
