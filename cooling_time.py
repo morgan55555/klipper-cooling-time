@@ -106,13 +106,13 @@ class ControlCoolingEstimator:
     def set_pwm(self, read_time, value):
         self.heater.set_pwm(read_time, value)
     def temperature_update(self, read_time, temp, target_temp):
-        if not self.done:
+        if not self.init:
+            self.set_pwm(read_time, 0.)
+            self.init = True
+        elif not self.done:
             self.temp_samples.append((read_time, temp))
             if temp <= target_temp:
                 self.done = True
-        elif not self.init:
-            self.set_pwm(read_time, 0.)
-            self.init = True
     def check_busy(self, eventtime, smoothed_temp, target_temp):
         if not self.done:
             return True
